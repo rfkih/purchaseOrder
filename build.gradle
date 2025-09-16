@@ -1,8 +1,3 @@
-//plugins {
-//	id 'java'
-//	id 'org.springframework.boot' version '3.5.5'
-//	id 'io.spring.dependency-management' version '1.1.7'
-//}
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.3'
@@ -15,9 +10,11 @@ version = '0.0.1-SNAPSHOT'
 description = 'CRUD project for Spring Boot'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+	toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+repositories {
+	mavenCentral()
 }
 
 configurations {
@@ -26,44 +23,22 @@ configurations {
 	}
 }
 
-repositories {
-	mavenCentral()
-}
-
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
 	implementation 'org.postgresql:postgresql:42.6.0'
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-
-
-// after plugins is OK
-group = 'com.example'
-version = '0.0.1-SNAPSHOT'
-
-java {
-	toolchain { languageVersion = JavaLanguageVersion.of(21) } // or 17
-}
-
-repositories {
-	mavenCentral()
-}
-
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-
-	testImplementation platform('org.junit:junit-bom:5.10.3')
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
-	testImplementation 'com.jayway.jsonpath:json-path:2.9.0'
+	testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'  // optional
+	testImplementation 'com.jayway.jsonpath:json-path:2.9.0'       // optional
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'   // optional
 }
 
 test {
@@ -82,7 +57,7 @@ jacocoTestReport {
 		csv.required = false
 		html.required = true
 	}
-	// optional excludes
+	// optional excludes from coverage
 	classDirectories.setFrom(files(classDirectories.files.collect {
 		fileTree(dir: it, exclude: [
 				'**/*Application.class',
@@ -93,7 +68,8 @@ jacocoTestReport {
 	}))
 }
 
-tasks.register('jacocoTestCoverageVerification', JacocoCoverageVerification) {
+/** ✅ Configure existing task (do NOT register a new one) */
+jacocoTestCoverageVerification {
 	dependsOn test
 	violationRules {
 		rule {
@@ -110,4 +86,4 @@ tasks.register('jacocoTestCoverageVerification', JacocoCoverageVerification) {
 	}
 }
 
-//check.dependsOn jacocoTestCoverageVerification
+check.dependsOn jacocoTestCoverageVerification
