@@ -11,7 +11,7 @@ import java.util.List;
 public interface PoHRepository extends JpaRepository<PoH, Integer> {
     @Query("""
     SELECT h FROM PoH h
-    WHERE (:type IS NULL OR h.description = :type)
+    WHERE (:type IS NULL OR :type = '' OR LOWER(h.description) LIKE LOWER(CONCAT('%', :type, '%')))
       AND h.createdDatetime >= COALESCE(:from, h.createdDatetime)
       AND h.createdDatetime <= COALESCE(:to, h.createdDatetime)
     ORDER BY h.createdDatetime DESC
