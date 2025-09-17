@@ -84,7 +84,7 @@ public class UserController {
                 applicationCode,
                 ResponseCode.SUCCESS.getCode(),
                 ResponseCode.SUCCESS.getDescription(),
-                "message : User %d deleted".formatted(id)
+                "User %d deleted".formatted(id)
                 ).getBody();
     }
 }

@@ -55,7 +55,7 @@ public class ItemController {
     }
 
     @PostMapping
-    public ResponseService create(@Validated @RequestBody CreateItemRequest request) {
+    public ResponseService create(@Validated @RequestBody CreateItemRequest request) throws InvalidTransactionException {
 
         ItemDto resp = itemService.create(request);
         return ResponseUtil.setResponse(

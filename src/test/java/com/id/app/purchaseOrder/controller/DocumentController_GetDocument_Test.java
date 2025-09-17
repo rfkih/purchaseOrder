@@ -46,11 +46,9 @@ class DocumentController_GetDocument_Test {
     @Autowired
     private MockMvc mvc;
 
-    // Controller dependency
     @MockBean
     private DocumentService documentService;
 
-    // Mock logging-related beans so the slice loads cleanly
     @MockBean private LoggingService loggingService;
     @MockBean private LogInterceptor logInterceptor;
     @MockBean private CustomRequestBodyAdviceAdapter customRequestBodyAdviceAdapter;

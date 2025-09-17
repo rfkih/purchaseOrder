@@ -13,16 +13,19 @@ import com.id.app.purchaseOrder.repository.ItemRepository;
 import com.id.app.purchaseOrder.repository.PoDRepository;
 import com.id.app.purchaseOrder.repository.PoHRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -44,7 +47,6 @@ class DocumentServiceTest {
     @BeforeEach
     void setUp() {
         activeItem1 = new Item();
-        // assuming your entity IDs are Integer; if Long, set accordingly
         activeItem1.setId(10);
         activeItem1.setName("Item A");
         activeItem1.setStatus("ACTIVE");
@@ -55,9 +57,22 @@ class DocumentServiceTest {
         activeItem2.setStatus("ACTIVE");
     }
 
+    private PoH headerWithDetails(int id, int detailsCount) {
+        PoH h = new PoH();
+        h.setId(id);
+        List<PoD> details = new ArrayList<>();
+        for (int i = 0; i < detailsCount; i++) {
+            PoD d = new PoD();
+            d.setId(i + 1);
+            d.setHeader(h);
+            details.add(d);
+        }
+        h.setDetails(details);
+        return h;
+    }
+
     @Test
     void create_gr_success_calculatesTotalsAndStockImpact() {
-        // Arrange
         var req = new CreateDocumentRequest(
                 "[GR] Goods receipt for PO-123",
                 LocalDateTime.parse("2025-01-10T12:00:00"),
@@ -67,36 +82,30 @@ class DocumentServiceTest {
                 )
         );
 
-        // poH save -> assign ID on first save and return; on second save return with totals
         when(poHRepo.save(any(PoH.class))).thenAnswer(inv -> {
             PoH h = inv.getArgument(0);
-            if (h.getId() == null) h.setId(1); // first save assigns ID
+            if (h.getId() == null) h.setId(1);
             return h;
         });
 
         when(itemRepo.findByIdAndStatus(10, "ACTIVE")).thenReturn(Optional.of(activeItem1));
         when(itemRepo.findByIdAndStatus(20, "ACTIVE")).thenReturn(Optional.of(activeItem2));
 
-        // poD save -> assign IDs to lines
         when(poDRepo.save(any(PoD.class))).thenAnswer(inv -> {
             PoD d = inv.getArgument(0);
             if (d.getId() == null) d.setId((int)(Math.random() * 1000 + 1)); // any int id
             return d;
         });
 
-        // Act
         DocumentResponse resp = service.create(req);
 
-        // Assert totals: totalCost = 2*100 + 3*200 = 800; totalPrice = 2*120 + 3*250 = 990
         assertThat(resp.totalCost()).isEqualTo(800);
         assertThat(resp.totalPrice()).isEqualTo(990);
-        // GR => stockImpact = + (2 + 3) = +5
         assertThat(resp.stockImpact()).isEqualTo(5);
         assertThat(resp.docType()).isEqualTo("GR");
         assertThat(resp.lines()).hasSize(2);
         assertThat(resp.id()).isNotNull();
 
-        // Verify saves
         verify(poHRepo, times(2)).save(any(PoH.class)); // header saved twice (before & after totals)
         verify(poDRepo, times(2)).save(any(PoD.class));
     }
@@ -205,4 +214,33 @@ class DocumentServiceTest {
         assertThat(list).hasSize(1);
         assertThat(list.get(0).type()).isEqualTo("PO");
     }
+
+    @Test
+    void delete_ok_withDetails() {
+        long id = 123L;
+        PoH h = headerWithDetails((int) id, 2);
+
+        when(poHRepo.findById((int) id)).thenReturn(Optional.of(h));
+
+        service.delete(id);
+
+        InOrder inOrder = inOrder(poDRepo, poHRepo);
+        inOrder.verify(poDRepo, times(1)).deleteAll(h.getDetails());
+        inOrder.verify(poHRepo, times(1)).delete(h);
+        verifyNoMoreInteractions(poDRepo, poHRepo);
+    }
+
+    @Test
+    void delete_notFound() {
+        long id = 999L;
+        when(poHRepo.findById((int) id)).thenReturn(Optional.empty());
+
+        assertThrows(DataAccessException.class, () -> service.delete(id));
+
+        verify(poDRepo, never()).deleteAll(anyList());
+        verify(poHRepo, never()).delete(any(PoH.class));
+        verify(poHRepo, times(1)).findById((int) id);
+        verifyNoMoreInteractions(poDRepo, poHRepo);
+    }
+
 }

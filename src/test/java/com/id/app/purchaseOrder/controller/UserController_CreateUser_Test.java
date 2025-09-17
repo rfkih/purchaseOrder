@@ -42,11 +42,9 @@ class UserController_CreateUser_Test {
     @Autowired
     private MockMvc mvc;
 
-    // Controller dependency
     @MockBean
     private UserService userService;
 
-    // Mock ALL logging-related beans so the slice loads cleanly
     @MockBean
     private LoggingService loggingService;
 
@@ -65,7 +63,6 @@ class UserController_CreateUser_Test {
         )).thenReturn(true);
     }
 
-    // helper to build a returned DTO from service
     private UserDto createdUser(int id, String firstName) {
         UserDto dto = new UserDto();
         dto.setId(id);

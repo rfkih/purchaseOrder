@@ -49,7 +49,6 @@ class ItemController_UpdateStatus_Test {
 
     @MockBean private ItemService itemService;
 
-    // Mock logging-related beans so the slice loads cleanly
     @MockBean private LoggingService loggingService;
     @MockBean private LogInterceptor logInterceptor;
     @MockBean private CustomRequestBodyAdviceAdapter customRequestBodyAdviceAdapter;
@@ -63,7 +62,6 @@ class ItemController_UpdateStatus_Test {
         )).thenReturn(true);
     }
 
-    // ---------- Test-only exception mapping ----------
     @RestControllerAdvice
     static class TestExceptionAdvice {
         @ExceptionHandler(BadRequestException.class)
@@ -116,7 +114,6 @@ class ItemController_UpdateStatus_Test {
     void badStatus_400() throws Exception {
         int id = 9;
 
-        // Fail fast if controller incorrectly calls service
         when(itemService.activate(anyInt()))
                 .thenThrow(new AssertionError("activate() must NOT be called for bad status"));
         when(itemService.deactivate(anyInt()))
@@ -144,8 +141,7 @@ class ItemController_UpdateStatus_Test {
 //        mvc.perform(patch("/api/items/{id}/status", id)
 //                        .contentType(MediaType.APPLICATION_JSON)
 //                        .content("{\"status\":\"ACTIVE\"}"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.data", nullValue()));
+//                .andExpect(status().isNotFound());
 //
 //        verify(itemService, times(1)).activate(id);
 //    }

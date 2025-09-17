@@ -80,13 +80,12 @@ class ItemServiceTest {
     }
 
     @Test
-    void create_ok_savesAndMaps() {
+    void create_ok_savesAndMaps() throws InvalidTransactionException {
         var svc = new ItemService(itemRepository, poDRepository);
         var req = new CreateItemRequest("  Cable  ", "USB-C", 50, 20);
 
         when(itemRepository.existsByNameIgnoreCase("Cable")).thenReturn(false);
 
-        // simulate save assigning id
         when(itemRepository.save(any(Item.class))).thenAnswer(inv -> {
             Item e = inv.getArgument(0);
             e.setId(5);
@@ -108,6 +107,8 @@ class ItemServiceTest {
                             && e.getCost() == 20
                             && e.getStatus().equals("ACTIVE")
             ));
+        } catch (InvalidTransactionException e) {
+            throw new InvalidTransactionException(e.getMessage());
         }
     }
 
@@ -119,7 +120,7 @@ class ItemServiceTest {
         when(itemRepository.existsByNameIgnoreCase("Adapter")).thenReturn(true);
 
         assertThatThrownBy(() -> svc.create(req))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(InvalidTransactionException.class)
                 .hasMessageContaining("already exists");
 
         verify(itemRepository, never()).save(any());
@@ -239,7 +240,6 @@ class ItemServiceTest {
         verify(itemRepository).save(e);
     }
 
-    // ---------- helpers ----------
     private static Item item(Integer id, String name, String status, Integer price, Integer cost) {
         Item i = new Item();
         i.setId(id);

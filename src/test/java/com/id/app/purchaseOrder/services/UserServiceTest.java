@@ -24,7 +24,6 @@ class UserServiceTest {
     @org.mockito.Mock
     UserRepository userRepository;
 
-    // ---------- helpers ----------
     private static User user(Integer id, String fn, String ln, String email, String phone) {
         User u = new User();
         u.setId(id);
@@ -109,7 +108,6 @@ class UserServiceTest {
 
             var out = svc.create(input);
 
-            // verify audit fields set before save
             verify(userRepository).save(argThat(u ->
                     "SYSTEM".equals(u.getCreatedBy()) &&
                             "SYSTEM".equals(u.getUpdatedBy()) &&

@@ -82,7 +82,6 @@ class UserController_UpdateUser_Test {
     @Test
     @DisplayName("PUT /api/users/{id} -> 200 with responseData (updated user)")
     void update_ok() throws Exception {
-        // given
         int id = 7;
         String body = """
         {
@@ -134,7 +133,6 @@ class UserController_UpdateUser_Test {
         int id = 7;
 
         String invalidBody = "{}";
-
         mvc.perform(put("/api/users/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidBody))

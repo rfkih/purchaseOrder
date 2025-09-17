@@ -34,7 +34,7 @@ public class DocumentService {
     }
 
     public DocumentResponse create(CreateDocumentRequest req) {
-        String docType = parseType(req.description()); // [PO],[GR],[ADJ_IN],[ADJ_OUT]
+        String docType = parseType(req.description());
         if (req.lines() == null || req.lines().isEmpty())
             throw new BadRequestException("Document must have at least 1 line");
 
@@ -143,6 +143,18 @@ public class DocumentService {
                 h.getTotalCost(),
                 detailDTOs
         );
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        PoH h = poHRepo.findById(Math.toIntExact(id))
+                .orElseThrow(() -> new DataAccessException("Document not found: " + id));
+
+        if (h.getDetails() != null && !h.getDetails().isEmpty()) {
+            poDRepo.deleteAll(h.getDetails());
+        }
+
+        poHRepo.delete(h);
     }
 
 

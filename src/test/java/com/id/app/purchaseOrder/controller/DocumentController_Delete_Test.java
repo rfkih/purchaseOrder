@@ -4,7 +4,7 @@ import com.id.app.purchaseOrder.exthandler.DataAccessException;
 import com.id.app.purchaseOrder.logging.CustomRequestBodyAdviceAdapter;
 import com.id.app.purchaseOrder.logging.LogInterceptor;
 import com.id.app.purchaseOrder.logging.LoggingService;
-import com.id.app.purchaseOrder.services.UserService;
+import com.id.app.purchaseOrder.services.DocumentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,22 +27,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Tests for:
- *   DELETE /api/users/{id}
+ *   DELETE /api/docs/{id}
  *
  * Pattern:
  *  - Security filters disabled
  *  - Logging beans mocked + interceptor allowed
  *  - Local advice maps DataAccessException -> 404
  */
-@WebMvcTest(controllers = UserController.class)
+@WebMvcTest(controllers = DocumentController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @TestPropertySource(properties = { "application.code=30062" })
-class UserController_Delete_Test {
+class DocumentController_Delete_Test {
 
     @Autowired private MockMvc mvc;
 
-    @MockBean private UserService userService;
+    @MockBean private DocumentService documentService;
 
+    // mock logging stack so the slice loads cleanly
     @MockBean private LoggingService loggingService;
     @MockBean private LogInterceptor logInterceptor;
     @MockBean private CustomRequestBodyAdviceAdapter customRequestBodyAdviceAdapter;
@@ -52,6 +53,7 @@ class UserController_Delete_Test {
         when(logInterceptor.preHandle(any(), any(), any())).thenReturn(true);
     }
 
+    // ---- test-only exception mapping (404 for not found) ----
     @RestControllerAdvice
     static class TestExceptionAdvice {
         @ExceptionHandler(DataAccessException.class)
@@ -61,31 +63,30 @@ class UserController_Delete_Test {
     }
 
     @Test
-    @DisplayName("DELETE /api/users/{id} -> 200, returns success envelope with message")
+    @DisplayName("DELETE /api/docs/{id} -> 200 with success envelope and message")
     void delete_ok() throws Exception {
-        int id = 12;
-        doNothing().when(userService).delete(id);
+        long id = 123L;
+        doNothing().when(documentService).delete(id);
 
-        mvc.perform(delete("/api/users/{id}", id))
+        mvc.perform(delete("/api/docs/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("application/json"))
-                .andExpect(jsonPath("$.responseCode").value("00"))
-                .andExpect(jsonPath("$.responseData").value("User " + id + " deleted"));
+                .andExpect(jsonPath("$.responseCode").value("00"));
 
-        verify(userService, times(1)).delete(eq(id));
+        verify(documentService, times(1)).delete(eq(id));
     }
 
     @Test
-    @DisplayName("DELETE /api/users/{id} -> 404 when user does not exist")
+    @DisplayName("DELETE /api/docs/{id} -> 404 when document not found")
     void delete_notFound() throws Exception {
-        int id = 999;
-        doThrow(new DataAccessException("User %d not found".formatted(id)))
-                .when(userService).delete(id);
+        long id = 999L;
+        doThrow(new DataAccessException("Document not found: " + id))
+                .when(documentService).delete(id);
 
-        mvc.perform(delete("/api/users/{id}", id))
+        mvc.perform(delete("/api/docs/{id}", id))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("User 999 not found"));
+                .andExpect(jsonPath("$.error").value("Document not found: " + id));
 
-        verify(userService, times(1)).delete(eq(id));
+        verify(documentService, times(1)).delete(eq(id));
     }
 }

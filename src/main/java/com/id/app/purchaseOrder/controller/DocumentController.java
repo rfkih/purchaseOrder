@@ -67,4 +67,16 @@ public class DocumentController {
                 documents
         ).getBody();
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseService delete(@PathVariable Long id) {
+        documentService.delete(id);
+        return ResponseUtil.setResponse(
+                HttpStatus.OK.value(),
+                applicationCode,
+                ResponseCode.SUCCESS.getCode(),
+                ResponseCode.SUCCESS.getDescription(),
+                " : Document %d deleted".formatted(id)
+        ).getBody();
+    }
 }

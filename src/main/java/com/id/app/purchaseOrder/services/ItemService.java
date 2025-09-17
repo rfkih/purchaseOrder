@@ -37,17 +37,18 @@ public class ItemService {
                 .orElseThrow(() -> new DataAccessException("Item %d not found".formatted(id)));
     }
 
-    public ItemDto create(CreateItemRequest req) {
+    public ItemDto create(CreateItemRequest req) throws InvalidTransactionException {
 
         if (itemRepository.existsByNameIgnoreCase(req.name().trim())) {
-            throw new InvalidInputException("Item name already exists");
+            throw new InvalidTransactionException("Item name already exists");
         }
         var e = new Item();
         e.setName(req.name().trim());
         e.setDescription(req.description());
         e.setPrice(req.price());
         e.setCost(req.cost());
-        e.setStatus("ACTIVE"); // soft-delete default
+        e.setCreatedBy("SYSTEM");
+        e.setStatus("ACTIVE");
 
         var saved = itemRepository.save(e);
         return toDto(saved);

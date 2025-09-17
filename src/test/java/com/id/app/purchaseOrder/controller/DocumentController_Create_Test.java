@@ -45,7 +45,6 @@ class DocumentController_Create_Test {
     @MockBean
     private DocumentService documentService;
 
-    // Mock logging-related beans so the slice loads cleanly
     @MockBean private LoggingService loggingService;
     @MockBean private LogInterceptor logInterceptor;
     @MockBean private CustomRequestBodyAdviceAdapter customRequestBodyAdviceAdapter;
@@ -59,7 +58,6 @@ class DocumentController_Create_Test {
         )).thenReturn(true);
     }
 
-    // Build a DocumentResponse record via its canonical constructor
     private DocumentResponse createdDoc() {
         List<DocLineResponse> lines = List.of(
                 new DocLineResponse(4L, 10L, 1, 4000, 5000),
@@ -83,7 +81,6 @@ class DocumentController_Create_Test {
     void create_ok() throws Exception {
         given(documentService.create(any())).willReturn(createdDoc());
 
-        // Sample payload from your prompt
         String body = """
         {
           "description": "[GR] GR-1003",
@@ -115,7 +112,6 @@ class DocumentController_Create_Test {
     @Test
     @DisplayName("POST /api/docs with invalid payload -> 400 (validation)")
     void create_validationError_400() throws Exception {
-        // Missing required fields to trigger @Valid on CreateDocumentRequest
         String invalidBody = "{}";
 
         mvc.perform(post("/api/docs")
