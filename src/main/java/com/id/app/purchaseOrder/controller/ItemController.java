@@ -55,8 +55,7 @@ public class ItemController {
     }
 
     @PostMapping
-    public ResponseService create(@Validated @RequestBody CreateItemRequest request,
-                                           @RequestHeader(value = "X-Actor", defaultValue = "SYSTEM") String actor) {
+    public ResponseService create(@Validated @RequestBody CreateItemRequest request) {
 
         ItemDto resp = itemService.create(request);
         return ResponseUtil.setResponse(
@@ -70,8 +69,7 @@ public class ItemController {
 
     @PutMapping("/{id}")
     public ResponseService update(@PathVariable Integer id,
-                              @Validated @RequestBody ItemDto dto,
-                              @RequestHeader(value = "X-Actor", defaultValue = "SYSTEM") String actor) {
+                              @Validated @RequestBody ItemDto dto) {
         ItemDto resp = itemService.update(id, dto);
 
         return ResponseUtil.setResponse(

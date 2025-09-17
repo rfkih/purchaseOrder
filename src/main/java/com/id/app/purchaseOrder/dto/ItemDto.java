@@ -16,6 +16,8 @@ public class ItemDto {
     private String description;
     @NotNull
     private Integer price;
+
+    private String status;
     @NotNull
     private Integer cost;
 }

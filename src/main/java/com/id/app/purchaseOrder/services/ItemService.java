@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.id.app.purchaseOrder.mapper.Mapper.toDto;
@@ -54,7 +55,7 @@ public class ItemService {
 
     @Transactional
     public ItemDto update(Integer id, ItemDto dto) {
-        var item = itemRepository.findById(id)
+        Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new DataAccessException("Item %d not found".formatted(id)));
 
         if (dto.getName() == null || dto.getName().isBlank())

@@ -36,6 +36,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'  // optional
 	testImplementation 'com.jayway.jsonpath:json-path:2.9.0'       // optional
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'   // optional

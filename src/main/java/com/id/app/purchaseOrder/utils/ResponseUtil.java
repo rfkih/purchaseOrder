@@ -23,44 +23,4 @@ public final class ResponseUtil {
         }
         return builder.body(body);
     }
-
-    /** Same as above but using HttpStatus directly. */
-    public static <T> ResponseEntity<ResponseService> setResponse(
-            HttpStatus status,
-            String applicationCode,
-            Object responseCode,
-            Object responseDesc,
-            T responseData
-    ) {
-        return setResponse(status.value(), applicationCode, responseCode, responseDesc, responseData);
-    }
-
-    /** Simpler variant without applicationCode header. */
-    public static <T> ResponseEntity<ResponseService> setResponse(
-            int httpStatus,
-            Object responseCode,
-            Object responseDesc,
-            T responseData
-    ) {
-        return ResponseEntity.status(httpStatus)
-                .body(new ResponseService(responseCode, responseDesc, responseData));
-    }
-
-    /** Convenience for OK (200). */
-    public static <T> ResponseEntity<ResponseService> ok(
-            Object responseCode,
-            Object responseDesc,
-            T responseData
-    ) {
-        return setResponse(HttpStatus.OK.value(), responseCode, responseDesc, responseData);
-    }
-
-    /** Convenience for error without data. */
-    public static ResponseEntity<ResponseService> error(
-            int httpStatus,
-            Object responseCode,
-            Object responseDesc
-    ) {
-        return setResponse(httpStatus, responseCode, responseDesc, null);
-    }
 }

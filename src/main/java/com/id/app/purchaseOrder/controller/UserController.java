@@ -9,7 +9,6 @@ import com.id.app.purchaseOrder.utils.ResponseUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +33,7 @@ public class UserController {
                         HttpStatus.OK.value(),
                         applicationCode,
                         ResponseCode.SUCCESS.getCode(),
+                        ResponseCode.SUCCESS.getDescription(),
                         dto
                         ).getBody();
             }else {

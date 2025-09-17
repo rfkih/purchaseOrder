@@ -54,7 +54,6 @@ public class DocumentService {
             if (l.itemCost() < 0 || l.itemPrice() < 0)
                 throw new BadRequestException( "itemCost/itemPrice must be >= 0");
 
-            // Load ACTIVE item and set it on PoD
             Item item = itemRepo.findByIdAndStatus(l.itemId(), "ACTIVE")
                     .orElseThrow(() -> new BadRequestException(
                             "Item %d not found or inactive".formatted(l.itemId())));

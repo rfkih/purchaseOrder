@@ -9,8 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -57,39 +59,6 @@ public class ExceptionHandlerConfig {
     }
 
 
-    /** Handles InvalidInputException and returns an error ResponseDto with HTTP 200 (OK).
-     * @param req request; @param e exception
-     * @return 200 OK with error body
-     */
-    @ExceptionHandler(value = {
-            InvalidInputException.class,
-    })
-    public ResponseEntity<ResponseDto> invalidInput(HttpServletRequest req, Exception e) {
-        ResponseDto errorResponse = ResponseDto.builder()
-                .responseCode(HttpStatus.INTERNAL_SERVER_ERROR.value()  + ResponseCode.BAD_REQUEST_INVALID_INPUT.getCode())
-                .responseDesc(ResponseCode.BAD_REQUEST_INVALID_INPUT.getDescription() + " - " + e.getMessage())
-                .build();
-        log.error("{} : {} - Invalid Input service for req - {}", e.getClass().getSimpleName(), e.getLocalizedMessage(), req.getRequestURL(), e);
-        return ResponseEntity.status(HttpStatus.OK).body(errorResponse);
-    }
-
-    /** Handles InvalidAccountException and returns an error ResponseDto with HTTP 200 (OK).
-     * @param req request; @param e exception
-     * @return 200 OK with error body
-     */
-    @ExceptionHandler(value = {
-            InvalidAccountException.class,
-    })
-    public ResponseEntity<ResponseDto> invalidAcount(HttpServletRequest req, Exception e) {
-        ResponseDto errorResponse = ResponseDto.builder()
-                .responseCode(HttpStatus.INTERNAL_SERVER_ERROR.value()  + ResponseCode.INVALID_ACCOUNT.getCode())
-                .responseDesc(ResponseCode.INVALID_ACCOUNT.getDescription() + " - " + e.getMessage())
-                .build();
-        log.error("{} : {} - Invalid Account service for req - {}", e.getClass().getSimpleName(), e.getLocalizedMessage(), req.getRequestURL(), e);
-        return ResponseEntity.status(HttpStatus.OK).body(errorResponse);
-    }
-
-
     @ExceptionHandler(value = {
             DataAccessException.class,
     })
@@ -116,6 +85,8 @@ public class ExceptionHandlerConfig {
 
     @ExceptionHandler(value = {
             BadRequestException.class,
+            MethodArgumentTypeMismatchException.class,
+            MethodArgumentNotValidException.class
     })
     public ResponseEntity<ResponseDto> badRequest(HttpServletRequest req, Exception e) {
         ResponseDto errorResponse = ResponseDto.builder()
